@@ -28,10 +28,18 @@ export default class Network {
 
 	handleMessage(channel, message) {
 		console.log(`Got message ${message} from ${channel}`);
+		const msg = JSON.parse(message);
+		if (channel === CHANNELS.BLOCKCHAIN) {
+			this.blockchain.replaceChain(msg);
+		}
 	}
 
 	publish({ channel, message }) {
-		this.publisher.publish(channel, message);
+		this.subscriber.unsubscribe(channel, () => {
+			this.publisher.publish(channel, message, () => {
+				this.subscriber.subscribe(channel);
+			});
+		});
 	}
 
 	loadChannels() {
