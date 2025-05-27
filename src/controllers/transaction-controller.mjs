@@ -5,10 +5,9 @@ export const addTransaction = (req, res) => {
 	let transaction = transactionPool.transactionExists({
 		address: wallet.publicKey,
 	});
-	console.log(transaction);
 	try {
 		if (transaction) {
-			transaction.update({ sender: wallet.publicKey, recipient, amount });
+			transaction.update({ sender: wallet, recipient, amount });
 		} else {
 			transaction = wallet.createTransaction({ recipient, amount });
 		}
