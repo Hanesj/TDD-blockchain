@@ -21,11 +21,21 @@ const ROOT_NODE = `http://localhost:${DEFAULT_PORT}`;
 app.use('/api', blockRouter);
 app.use('/api/wallet', transactionRouter);
 const synchronize = async () => {
-	const response = await fetch(`${ROOT_NODE}/api`);
+	let response = await fetch(`${ROOT_NODE}/api`);
 	if (response) {
 		const result = await response.json();
 		console.log('Replacing chain on sync with: ', result.data.chain);
 		blockChain.replaceChain(result.data.chain);
+	}
+	response = await fetch(`${ROOT_NODE}/api/wallet/transactions`);
+
+	if (response) {
+		const result = await response.json();
+		console.log(
+			'Replacing transaction pool map on sync with: ',
+			result.data
+		);
+		transactionPool.replaceMap(result.data);
 	}
 };
 

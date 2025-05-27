@@ -1,4 +1,5 @@
 import { beforeEach, expect, it } from 'vitest';
+import { MINING_REWARD, REWARD_ADDRESS } from '../../utilitites/config.mjs';
 import Transaction from './Transaction.mjs';
 import Wallet from './Wallet.mjs';
 import { verifySignature } from '../../utilitites/keyManager.mjs';
@@ -167,6 +168,23 @@ describe('transaction', () => {
 					);
 				});
 			});
+		});
+	});
+
+	describe('transaction reward', () => {
+		let transactionReward, miner;
+		beforeEach(() => {
+			miner = new Wallet();
+
+			transactionReward = Transaction.transactionReward({ miner });
+		});
+		it('should create a reward transaction', () => {
+			expect(transactionReward.inputMap).toEqual(REWARD_ADDRESS);
+		});
+		it('should create only one transaction with the MINING_REWARD', () => {
+			expect(transactionReward.outputMap[miner.publicKey]).toEqual(
+				MINING_REWARD
+			);
 		});
 	});
 });

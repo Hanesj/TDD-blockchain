@@ -1,4 +1,11 @@
-import { transactionPool, wallet, networkServer } from '../server.mjs';
+import {
+	transactionPool,
+	wallet,
+	networkServer,
+	blockChain,
+} from '../server.mjs';
+
+import Miner from '../models/miner/Miner.mjs';
 
 export const addTransaction = (req, res) => {
 	const { amount, recipient } = req.body;
@@ -32,5 +39,22 @@ export const listAllTransactions = (req, res) => {
 		success: true,
 		statuscode: 200,
 		data: transactionPool.transactionMap,
+	});
+};
+
+export const mineTransactionPool = (req, res) => {
+	const miner = new Miner({
+		transactionPool,
+		wallet,
+		blockchain: blockChain,
+		networkServer,
+	});
+
+	miner.mineTransactions();
+
+	res.status(200).json({
+		success: true,
+		statuscode: 200,
+		data: 'Det verkar funka',
 	});
 };

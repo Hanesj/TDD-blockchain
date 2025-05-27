@@ -1,17 +1,21 @@
 import { v4 as uuid } from 'uuid';
 import { verifySignature } from '../../utilitites/keyManager.mjs';
+import { MINING_REWARD, REWARD_ADDRESS } from '../../utilitites/config.mjs';
 
 export default class Transaction {
-	constructor({ sender, recipient, amount }) {
+	constructor({ sender, recipient, amount, inputMap, outputMap }) {
 		//	this.transaction = { sender, recipient, amount };
 
 		this.id = uuid().replaceAll('-', '');
 
-		this.outputMap = this.createOutputMap({ sender, recipient, amount });
-		this.inputMap = this.createInputMap({
-			sender,
-			outputMap: this.outputMap,
-		});
+		this.outputMap =
+			outputMap || this.createOutputMap({ sender, recipient, amount });
+		this.inputMap =
+			inputMap ||
+			this.createInputMap({
+				sender,
+				outputMap: this.outputMap,
+			});
 		//this.outputMap = {
 		//sender: sender.publicKey,
 		//recipient: recipient,
@@ -39,6 +43,12 @@ export default class Transaction {
 		)
 			return false;
 		return true;
+	}
+	static transactionReward({ miner }) {
+		return new this({
+			inputMap: REWARD_ADDRESS,
+			outputMap: { [miner.publicKey]: MINING_REWARD },
+		});
 	}
 	update({ sender, recipient, amount }) {
 		// kontroll for avsandares balans
