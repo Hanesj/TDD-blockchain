@@ -2,6 +2,7 @@ import { beforeEach, expect, it } from 'vitest';
 import Wallet from './Wallet.mjs';
 import { keyMgr, verifySignature } from '../../utilitites/keyManager.mjs';
 import { createHash } from '../../utilitites/hash.mjs';
+import Transaction from './Transaction.mjs';
 describe('Wallet', () => {
 	let wallet;
 
@@ -35,6 +36,39 @@ describe('Wallet', () => {
 					signature: new Wallet().sign(data),
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('balance in wallet', () => {
+		describe('balance is lower than the amount is being sent', () => {
+			it('should throw error', () => {
+				expect(() =>
+					wallet.createTransaction({
+						amount: 110,
+						recipient: new Wallet(),
+					})
+				).toThrow('Not enough balance!');
+			});
+			describe('enough funds to send', () => {
+				let trx, amount, recipient;
+				beforeEach(() => {
+					amount = 25;
+					recipient = 'Testarn';
+					trx = wallet.createTransaction({ amount, recipient });
+					console.log(trx);
+				});
+				it('should create transaction object', () => {
+					expect(trx).toBeInstanceOf(Transaction);
+				});
+
+				it('should match wallet input', () => {
+					expect(trx.inputMap.address).toEqual(wallet.publicKey);
+				});
+
+				it('should output the amount to recipient', () => {
+					expect(trx.outputMap[recipient]).toEqual(amount);
+				});
+			});
 		});
 	});
 });
