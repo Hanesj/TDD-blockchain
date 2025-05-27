@@ -1,4 +1,4 @@
-import { createHash } from '../utilitites/hash.mjs';
+import { createHash } from '../../utilitites/hash.mjs';
 import Block from './Block.mjs';
 
 export default class Blockchain {
