@@ -40,6 +40,26 @@ export default class Transaction {
 			return false;
 		return true;
 	}
+	update({ sender, recipient, amount }) {
+		// kontroll for avsandares balans
+		if (this.outputMap[sender.publicKey] < amount) {
+			throw new Error('Not enough balance!');
+		}
+		// ny mottagare eller ska det laggas till en ny
+
+		if (!this.outputMap[recipient]) {
+			this.outputMap[recipient] = amount;
+		} else {
+			this.outputMap[recipient] += amount;
+		}
+
+		this.outputMap[sender.publicKey] -= amount;
+
+		this.inputMap = this.createInputMap({
+			sender,
+			outputMap: this.outputMap,
+		});
+	}
 	createOutputMap({ sender, recipient, amount }) {
 		const map = {};
 

@@ -9,7 +9,7 @@ export const addBlock = (req, res) => {
 	const { data } = req.body;
 	blockChain.addBlock({ data });
 
-	networkServer.broadCast();
+	networkServer.broadCastChain();
 
 	res.status(201).json({ success: true, message: 'Block added' });
 };

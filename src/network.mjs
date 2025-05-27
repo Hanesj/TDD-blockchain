@@ -3,9 +3,11 @@ import redis from 'redis';
 const CHANNELS = {
 	TEST: 'TEST',
 	BLOCKCHAIN: 'BLOCKCHAIN',
+	TRANSACTION: 'TRANSACTION',
 };
 export default class Network {
-	constructor({ blockchain }) {
+	constructor({ blockchain, transactionPool }) {
+		this.transactionPool = transactionPool;
 		this.blockchain = blockchain;
 		this.subscriber = redis.createClient();
 		this.publisher = redis.createClient();
@@ -19,18 +21,34 @@ export default class Network {
 			this.handleMessage(channel, message);
 		});
 	}
-	broadCast() {
+	broadCastChain() {
 		this.publish({
 			channel: CHANNELS.BLOCKCHAIN,
 			message: JSON.stringify(this.blockchain.chain),
+		});
+	}
+	broadCastTransaction(transaction) {
+		this.publish({
+			channel: CHANNELS.TRANSACTION,
+			message: JSON.stringify(transaction),
 		});
 	}
 
 	handleMessage(channel, message) {
 		console.log(`Got message ${message} from ${channel}`);
 		const msg = JSON.parse(message);
-		if (channel === CHANNELS.BLOCKCHAIN) {
-			this.blockchain.replaceChain(msg);
+
+		switch (channel) {
+			case CHANNELS.BLOCKCHAIN:
+				this.blockchain.replaceChain(msg);
+				break;
+
+			case CHANNELS.TRANSACTION:
+				this.transactionPool.addTransaction(msg);
+				break;
+
+			default:
+				return;
 		}
 	}
 

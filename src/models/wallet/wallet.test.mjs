@@ -44,7 +44,7 @@ describe('Wallet', () => {
 			it('should throw error', () => {
 				expect(() =>
 					wallet.createTransaction({
-						amount: 110,
+						amount: 1100,
 						recipient: new Wallet(),
 					})
 				).toThrow('Not enough balance!');

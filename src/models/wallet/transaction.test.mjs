@@ -98,4 +98,75 @@ describe('transaction', () => {
 			});
 		});
 	});
+
+	describe('update transaction', () => {
+		let orgSignature, orgSenderOutMap, nextRecipient, nextAmount;
+
+		describe('and the amount is invalid (funds too low)', () => {
+			it('should throw an error', () => {
+				expect(() => {
+					transaction.update({ sender, recipient, amount: 1100 });
+				}).toThrow('Not enough balance!');
+			});
+		});
+		describe('and the amount is valid', () => {
+			beforeEach(() => {
+				orgSignature = transaction.inputMap.signature;
+				orgSenderOutMap = transaction.outputMap[sender.publicKey];
+				nextAmount = 25;
+				nextRecipient = 'Loki';
+
+				transaction.update({
+					sender,
+					recipient: nextRecipient,
+					amount: nextAmount,
+				});
+			});
+			it('should display the amount to the next recipient', () => {
+				expect(transaction.outputMap[nextRecipient]).toEqual(
+					nextAmount
+				);
+			});
+			it('should decrease the senders balance', () => {
+				expect(transaction.outputMap[sender.publicKey]).toEqual(
+					orgSenderOutMap - nextAmount
+				);
+			});
+			it('should match the total balance with input amount', () => {
+				expect(
+					Object.values(transaction.outputMap).reduce(
+						(sum, amount) => sum + amount
+					)
+				).toEqual(transaction.inputMap.amount);
+			});
+			it('should create a new signature', () => {
+				expect(transaction.inputMap.signature).not.toEqual(
+					orgSignature
+				);
+			});
+
+			describe('and an update for the same recipient', () => {
+				let newAmount;
+				beforeEach(() => {
+					newAmount = 32;
+					transaction.update({
+						sender,
+						recipient: nextRecipient,
+						amount: newAmount,
+					});
+				});
+				it('should update the recipients amount', () => {
+					expect(transaction.outputMap[nextRecipient]).toEqual(
+						nextAmount + newAmount
+					);
+				});
+
+				it('should withdraw balance from the sender', () => {
+					expect(transaction.outputMap[sender.publicKey]).toEqual(
+						orgSenderOutMap - nextAmount - newAmount
+					);
+				});
+			});
+		});
+	});
 });
